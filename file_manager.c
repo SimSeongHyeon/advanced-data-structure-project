@@ -5,12 +5,17 @@
 
 // 파일 열기 함수
 int openFile(Deque* deque, const char* filename) {
-    FILE* file = fopen(filename, "r");
-    if (file == NULL) {
-        perror("Could not open file");
-        return -1;
+    FILE* file;
+
+    // "r+" 모드로 파일 열기 (파일이 없을 경우 쓰기 모드로 새로 생성)
+    if (fopen_s(&file, filename, "r+") != 0) {
+        if (fopen_s(&file, filename, "w+") != 0) {
+            perror("Could not open file");
+            return -1;
+        }
     }
 
+    // 파일 내용을 덱에 읽어오기
     char buffer[1024];
     while (fgets(buffer, sizeof(buffer), file)) {
         buffer[strcspn(buffer, "\n")] = '\0';  // 줄바꿈 제거

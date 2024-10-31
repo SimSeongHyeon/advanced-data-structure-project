@@ -1,5 +1,6 @@
+#include <stdio.h>
 #include "input.h"
-#include "cursor_text.h"  // 커서 구조체와 외부 변수 cursor 사용 가능
+#include "cursor_text.h"     // 커서 구조체와 외부 변수 cursor 사용 가능
 
 void handleInput(char input, Deque* deque) {
     switch (input) {
