@@ -127,25 +127,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cursor_text.c" />
-    <ClCompile Include="deque.c" />
-    <ClCompile Include="display.c" />
-    <ClCompile Include="file_manager.c" />
-    <ClCompile Include="input.c" />
-    <ClCompile Include="main.c" />
-    <ClCompile Include="search.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="cursor_text.h" />
-    <ClInclude Include="deque.h" />
-    <ClInclude Include="display.h" />
-    <ClInclude Include="file_manager.h" />
-    <ClInclude Include="input.h" />
-    <ClInclude Include="search.h" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Makefile" />
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\cursor_text.c" />
+    <ClCompile Include="src\deque.c" />
+    <ClCompile Include="src\display.c" />
+    <ClCompile Include="src\file_manager.c" />
+    <ClCompile Include="src\input.c" />
+    <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\search.c" />
+    <ClCompile Include="src\test.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\cursor_text.h" />
+    <ClInclude Include="src\deque.h" />
+    <ClInclude Include="src\display.h" />
+    <ClInclude Include="src\file_manager.h" />
+    <ClInclude Include="src\input.h" />
+    <ClInclude Include="src\os_terminal.h" />
+    <ClInclude Include="src\search.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
