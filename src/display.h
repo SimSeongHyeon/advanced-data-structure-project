@@ -1,10 +1,11 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-#include "deque.h"
+#include "line_node.h"
 #include "cursor_text.h"
 
-void display_text(Deque* deque);
-void update_status_bar(const char* filename, Deque* deque);
+void display_text(LineList* line_list);
+void update_status_bar(const char* filename, LineList* line_list, int cursor_x, int cursor_y);
+void update_message_bar(const char* message);
 
 #endif // DISPLAY_H

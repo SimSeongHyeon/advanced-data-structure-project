@@ -43,6 +43,9 @@
     <ClCompile Include="src\test.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="src\line_node.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\cursor_text.h">
@@ -64,6 +67,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="src\search.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="src\line_node.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

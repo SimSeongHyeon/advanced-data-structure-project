@@ -136,6 +136,7 @@
     <ClCompile Include="src\display.c" />
     <ClCompile Include="src\file_manager.c" />
     <ClCompile Include="src\input.c" />
+    <ClCompile Include="src\line_node.c" />
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\search.c" />
     <ClCompile Include="src\test.c" />
@@ -146,6 +147,7 @@
     <ClInclude Include="src\display.h" />
     <ClInclude Include="src\file_manager.h" />
     <ClInclude Include="src\input.h" />
+    <ClInclude Include="src\line_node.h" />
     <ClInclude Include="src\os_terminal.h" />
     <ClInclude Include="src\search.h" />
   </ItemGroup>

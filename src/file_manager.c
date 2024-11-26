@@ -1,66 +1,94 @@
 #include "file_manager.h"
+#include "line_node.h"
+#include "deque.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// 파일이 존재하는지 확인하는 함수
-int file_exists(const char* filename) {
-    FILE* file = fopen(filename, "r");
-    if (file) {
-        fclose(file);
-        return 1; // 파일이 존재
-    }
-    return 0; // 파일이 존재하지 않음
-}
-
-// 중복되지 않는 파일 이름을 생성하는 함수
-void generate_unique_filename(char* filename) {
-    int count = 1;
-    while (file_exists(filename)) {
-        sprintf(filename, "untitled(%d).txt", count++);
-    }
-}
-
-Deque* load_file(const char* filename) {
-    Deque* deque = init_deque();
-    char line[256];
+LineList* load_file(const char* filename) {
+    fprintf(stderr, "Attempting to open file: %s\n", filename);
 
     FILE* file = fopen(filename, "r");
-    if (file) {
-        // 파일이 존재하는 경우, 내용을 불러옴
-        while (fgets(line, sizeof(line), file)) {
-            append_node(deque, line);
-        }
-        fclose(file);
+    LineList* line_list = init_line_list();
+
+    if (!line_list) {
+        fprintf(stderr, "Failed to initialize line_list\n");
+        return NULL;
     }
-    else {
-        // 파일이 존재하지 않으면 새로 생성
+
+    if (!file) {
+        fprintf(stderr, "File not found. Creating new file: %s\n", filename);
         file = fopen(filename, "w");
-        if (file) {
-            fclose(file);
-        }
-        else {
-            printf("Error creating file: %s\n", filename);
-            free_deque(deque);
+        if (!file) {
+            fprintf(stderr, "Error creating file: %s\n", filename);
+            free(line_list);
             return NULL;
         }
+        fclose(file);
+
+        // 새 파일 생성 시 기본 라인 추가
+        LineNode* new_line = create_line_node();
+        if (!new_line) {
+            fprintf(stderr, "Failed to create initial line node\n");
+            free(line_list);
+            return NULL;
+        }
+        append_line(line_list, new_line);
+        fprintf(stderr, "Initial line added to new file\n");
+
+        return line_list;
     }
 
-    return deque;
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        LineNode* new_line = create_line_node();
+        if (!new_line) {
+            fprintf(stderr, "Failed to create new line node\n");
+            fclose(file);
+            free_line_list(line_list);
+            return NULL;
+        }
+
+        for (int i = 0; line[i] != '\0'; i++) {
+            if (line[i] == '\n') continue;  // 줄 바꿈 문자 제외
+            push_back(new_line->left_deque, line[i]);
+        }
+        append_line(line_list, new_line);
+    }
+    fclose(file);
+
+    if (!line_list->head) {
+        // 기존 파일이 비어있는 경우 기본 라인 추가
+        fprintf(stderr, "File is empty, adding an initial line\n");
+        LineNode* new_line = create_line_node();
+        if (!new_line) {
+            fprintf(stderr, "Failed to create initial line node for empty file\n");
+            free_line_list(line_list);
+            return NULL;
+        }
+        append_line(line_list, new_line);
+    }
+
+    fprintf(stderr, "File loaded successfully\n");
+    return line_list;
 }
 
-void save_file(const char* filename, Deque* deque) {
+void save_file(const char* filename, LineList* line_list) {
     FILE* file = fopen(filename, "w");
     if (!file) {
         printf("Error saving file: %s\n", filename);
         return;
     }
 
-    Node* current = deque->head;
+    LineNode* current = line_list->head;
     while (current) {
-        fputs(current->line, file);
+        Node* left_node = current->left_deque->head;
+        while (left_node) {
+            fputc(left_node->data, file);
+            left_node = left_node->next;
+        }
+        fputc('\n', file);  // 각 라인의 끝에 \n 추가
         current = current->next;
     }
-
     fclose(file);
 }
