@@ -5,18 +5,15 @@
 #include "display.h"
 #include "file_manager.h"
 #include "search.h"
+#include "globals.h"
 #include <string.h>
 
-void save_file_with_prompt(LineList* line_list, const char* current_filename) {
-    char filename[256];
-    if (!current_filename || strlen(current_filename) == 0) {
+void save_file_with_prompt(LineList* line_list) {
+    if (strlen(filename) == 0) { // 파일 이름이 없는 경우 입력받음
         echo();
         update_message_bar("Enter file name to save: ");
         mvgetstr(LINES - 1, 25, filename); // 메시지 바에서 파일 이름 입력
         noecho();
-    }
-    else {
-        strncpy(filename, current_filename, sizeof(filename));
     }
 
     save_file(filename, line_list);
@@ -78,7 +75,7 @@ void search_and_highlight(LineList* line_list, int* cursor_x, int* cursor_y) {
 }
 
 int confirm_exit(int* unsaved_changes) {
-    if (*unsaved_changes) {
+    if (*unsaved_changes) { // 저장되지 않은 변경 사항이 있을 경우
         update_message_bar("Unsaved changes! Press Ctrl+Q again to quit without saving.");
         int ch = getch(); // 사용자 입력 대기
         if (ch == 17) {   // Ctrl+Q가 다시 눌리면
@@ -90,14 +87,20 @@ int confirm_exit(int* unsaved_changes) {
     return 1; // 저장된 상태면 바로 종료
 }
 
-void handle_input(LineList* line_list, LineNode* current_line, int* cursor_x, int* cursor_y, const char* filename) {
+void handle_input(LineList* line_list, LineNode* current_line, int* cursor_x, int* cursor_y) {
     int unsaved_changes = 0; // 변경 사항 추적 변수
     int ch;
-    while ((ch = getch())) {
+
+    while (1) {
+        ch = getch(); // 사용자 입력 대기
+        if (ch == ERR) { // 입력이 없으면 continue
+            continue;
+        }
+
         switch (ch) {
         case 19: // Ctrl+S (Save)
-            save_file_with_prompt(line_list, filename);
-            unsaved_changes = 0; // 변경 상태 초기화
+            save_file_with_prompt(line_list); // 파일 저장
+            unsaved_changes = 0; // 저장 후 변경 상태 초기화
             break;
 
         case 17: // Ctrl+Q (Quit)
@@ -105,6 +108,37 @@ void handle_input(LineList* line_list, LineNode* current_line, int* cursor_x, in
                 return; // 프로그램 종료
             }
             break;
+
+        case '\n': // 줄바꿈 처리
+        case KEY_ENTER: {
+            // 새로운 줄 생성
+            LineNode* new_line = create_line_node();
+            if (!new_line) {
+                update_message_bar("Error: Unable to create new line.");
+                continue;
+            }
+
+            // 현재 줄의 오른쪽 덱 내용을 새 줄로 이동
+            while (current_line->right_deque->size > 0) {
+                char c = pop_front(current_line->right_deque);
+                push_back(new_line->left_deque, c);
+            }
+
+            // 새로운 줄을 현재 줄 다음에 삽입
+            new_line->prev = current_line;
+            new_line->next = current_line->next;
+            if (current_line->next) {
+                current_line->next->prev = new_line;
+            }
+            current_line->next = new_line;
+
+            // 커서를 새 줄로 이동
+            current_line = new_line;
+            *cursor_x = 0;  // 새 줄의 시작 위치
+            *cursor_y += 1; // 한 줄 아래로 이동
+            unsaved_changes = 1; // 변경 사항 기록
+        }
+                      break;
 
         case KEY_LEFT:
             if (current_line->left_deque->size > 0) {
@@ -140,11 +174,12 @@ void handle_input(LineList* line_list, LineNode* current_line, int* cursor_x, in
             push_back(current_line->left_deque, ch);
             (*cursor_x)++;
             unsaved_changes = 1; // 변경 사항 기록
+            break;
         }
 
         clear();
         display_text(line_list);
-        update_status_bar(filename, line_list, *cursor_x, *cursor_y);
+        update_status_bar(filename, line_list, *cursor_x, *cursor_y); // 상태바 갱신
         refresh();
     }
 }
