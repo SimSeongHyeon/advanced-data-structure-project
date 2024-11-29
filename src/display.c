@@ -7,11 +7,11 @@
 void display_text(LineList* line_list) {
     LineNode* current = line_list->head;
     int y = 0;
-    while (current && y < LINES - 2) { // 상태바와 메시지바를 제외한 영역
+    while (current && y < LINES - 2) {
         Node* left_current = current->left_deque->head;
-        int x = 0; // x 위치 초기화
+        int x = 0;
         while (left_current) {
-            mvprintw(y, x++, "%c", left_current->data); // 각 문자를 출력
+            mvprintw(y, x++, "%c", left_current->data);
             left_current = left_current->next;
         }
         y++;
@@ -33,7 +33,7 @@ void update_status_bar(const char* filename, LineList* line_list, int cursor_x, 
         display_filename, line_list->total_lines, cursor_y + 1, cursor_x + 1);
 
     attron(A_REVERSE);
-    mvprintw(max_y - 2, 0, "%-*s", max_x, status); // 상태 바 출력
+    mvprintw(max_y - 2, 0, "%-*s", max_x, status); // 상태 바는 항상 아래에서 두 번째 라인에 유지
     attroff(A_REVERSE);
     refresh();
 }
@@ -42,19 +42,31 @@ void update_message_bar(const char* message) {
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
 
-    if (max_y < 1) return; // 터미널 높이가 충분하지 않으면 메시지 바 표시 생략
+    move(max_y - 1, 0);  // 가장 아래 라인으로 이동
+    clrtoeol();  // 기존 메시지 삭제
+    mvprintw(max_y - 1, 0, "%-*s", max_x, message); // 메시지를 화면에 맞게 출력
+    refresh();
 
-    mvprintw(max_y - 1, 0, "%-*s", max_x, message ? message : ""); // 메시지 출력
+    napms(2000);  // 2초 동안 메시지 유지
+
+    // 메시지 삭제
+    move(max_y - 1, 0);
+    clrtoeol();  // 메시지 삭제
     refresh();
 }
 
+
 void display_help_bar() {
     int max_y, max_x;
-    getmaxyx(stdscr, max_y, max_x); // 현재 창 크기 가져오기
-    
-    mvprintw(max_y - 1, 0, "HELP: Ctrl-S = save | Ctrl-Q = quit | Ctrl-F = find");
-    for (int i = strlen("HELP: Ctrl-S = save | Ctrl-Q = quit | Ctrl-F = find"); i < max_x; i++) {
-        mvaddch(max_y - 1, i, ' '); // 나머지 공간을 채우기
-    }
+    getmaxyx(stdscr, max_y, max_x);
+
+    move(max_y - 1, 0);
+    clrtoeol();
+
+    // max_x를 활용해 도움말 메시지를 화면 너비에 맞춰 출력
+    char help_message[256];
+    snprintf(help_message, sizeof(help_message), "HELP: Ctrl-S = save | Ctrl-Q = quit | Ctrl-F = find");
+    mvprintw(max_y - 1, 0, "%-*s", max_x, help_message);
+
     refresh();
 }

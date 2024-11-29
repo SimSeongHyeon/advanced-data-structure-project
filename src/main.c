@@ -6,9 +6,12 @@
 #include "input.h"
 #include "os_terminal.h"
 
-// to-do
-// back-space 구현
-// ctrl-f 구현
+// to do
+// 커서 구현
+// 방향키, 백스페이스 구현
+// 저장 안 하고 종료시 경고 메시지 유지
+// 저장 시 기존 파일 있으면 이미 있다는 경고 출력
+
 
 // 전역 변수 선언
 char filename[256] = { '\0' }; // 프로그램 전체에서 사용할 파일 이름
@@ -30,7 +33,6 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        // 새로운 파일에 기본 빈 라인 추가
         LineNode* new_line = create_line_node();
         if (!new_line) {
             free_line_list(line_list);
@@ -38,11 +40,10 @@ int main(int argc, char* argv[]) {
             fprintf(stderr, "Failed to initialize a new line.\n");
             return 1;
         }
-        append_line(line_list, new_line); // 빈 라인을 리스트에 추가
-        update_message_bar("New file created. Press Ctrl+S to save.");
+        append_line(line_list, new_line);
     }
     else if (argc == 2) { // 기존 파일 열기
-        strncpy(filename, argv[1], sizeof(filename)); // 전역 변수에 파일 이름 저장
+        strncpy(filename, argv[1], sizeof(filename));
         line_list = load_file(filename);
         if (!line_list) {
             endwin();
@@ -50,7 +51,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
-    else { // 잘못된 명령어 사용
+    else {
         endwin();
         fprintf(stderr, "Usage: ./viva [filename]\n");
         return 1;
@@ -58,17 +59,15 @@ int main(int argc, char* argv[]) {
 
     int cursor_x = 0, cursor_y = 0;
 
-    // 기존 파일 내용 표시
+    // 화면 초기화
     clear();
     display_text(line_list);
     update_status_bar(filename, line_list, cursor_x, cursor_y);
-    display_help_bar();
+    display_help_bar(); // Help Bar 추가
     refresh();
 
-    // 입력 처리
-    handle_input(line_list, line_list->head, &cursor_x, &cursor_y);
+    handle_input(line_list, line_list->head, &cursor_x, &cursor_y, filename);
 
-    // 메모리 정리 및 종료
     free_line_list(line_list);
     endwin();
     return 0;
