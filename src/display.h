@@ -4,7 +4,7 @@
 #include "line_node.h"
 #include "cursor_text.h"
 
-void display_text(LineList* line_list);
+void display_text(LineList* line_list, Cursor* cursor);
 void update_status_bar(const char* filename, LineList* line_list, int cursor_x, int cursor_y);
 void update_message_bar(const char* message);
 void display_help_bar();

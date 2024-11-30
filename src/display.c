@@ -4,21 +4,59 @@
 #include <stdio.h>
 #include <string.h>
 
-void display_text(LineList* line_list) {
+void display_text(LineList* line_list, Cursor* cursor) {
     LineNode* current = line_list->head;
     int y = 0;
-    while (current && y < LINES - 2) {
+
+    while (current && y < LINES - 2) { // 상태 바와 메시지 바를 제외한 영역
         Node* left_current = current->left_deque->head;
         int x = 0;
+
+        // left_deque에서 출력
         while (left_current) {
-            mvprintw(y, x++, "%c", left_current->data);
+            if (y == cursor->y && x == cursor->x) {
+                // 커서 위치의 문자는 색 반전으로 표시
+                attron(A_REVERSE);
+                mvprintw(y, x, "%c", left_current->data);
+                attroff(A_REVERSE);
+            }
+            else {
+                mvprintw(y, x, "%c", left_current->data);
+            }
             left_current = left_current->next;
+            x++;
         }
+
+        // right_deque에서 출력
+        Node* right_current = current->right_deque->head;
+        while (right_current) {
+            if (y == cursor->y && x == cursor->x) {
+                // 커서 위치의 문자는 색 반전으로 표시
+                attron(A_REVERSE);
+                mvprintw(y, x, "%c", right_current->data);
+                attroff(A_REVERSE);
+            }
+            else {
+                mvprintw(y, x, "%c", right_current->data);
+            }
+            right_current = right_current->next;
+            x++;
+        }
+
+        // 커서가 줄의 끝에 위치한 경우 빈 공간에 색 반전 처리
+        if (y == cursor->y && x == cursor->x) {
+            attron(A_REVERSE);
+            mvprintw(y, x, " "); // 공백 출력
+            attroff(A_REVERSE);
+        }
+
         y++;
         current = current->next;
     }
+
     refresh();
 }
+
 
 void update_status_bar(const char* filename, LineList* line_list, int cursor_x, int cursor_y) {
     int max_y, max_x;

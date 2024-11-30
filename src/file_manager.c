@@ -7,6 +7,9 @@
 #include <string.h>
 
 LineList* load_file(const char* filename) {
+
+    fprintf(stderr, "Loading file: %s\n", filename); // 파일 로드 시작 로그
+
     FILE* file = fopen(filename, "r");
     if (!file) {
         // 파일이 없으면 NULL 반환
@@ -30,6 +33,9 @@ LineList* load_file(const char* filename) {
         append_line(line_list, new_line);
     }
     fclose(file);
+
+    fprintf(stderr, "File '%s' loaded successfully. Total lines: %d\n", filename, line_list->total_lines); // 파일 로드 완료 로그
+
     return line_list;
 }
 

@@ -54,7 +54,6 @@ void append_line(LineList* list, LineNode* line_node) {
     }
 
     list->total_lines++;
-    fprintf(stderr, "Line appended: total_lines = %d\n", list->total_lines);
 }
 
 
@@ -71,4 +70,3 @@ void free_line_list(LineList* list) {
     }
     free(list);
 }
-
