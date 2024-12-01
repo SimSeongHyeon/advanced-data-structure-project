@@ -54,6 +54,7 @@ void move_cursor(int dx, int dy, LineNode** current_line, Cursor* cursor, LineLi
     if (cursor->x >= line_length_with_space) cursor->x = line_length_with_space - 1;
 }
 
+
 void set_cursor_position(int x, int y, int max_x, int max_y) {
     cursor.x = x;
     cursor.y = y;

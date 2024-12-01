@@ -186,10 +186,31 @@ void handle_input(LineList* line_list, LineNode* current_line, int* cursor_x, in
         }
                  break;
 
-        default:
-            push_back(current_line->left_deque, ch);
-            cursor.x++;
-            unsaved_changes = 1;
+        default: // 일반 문자 입력 처리
+            // 커서가 left_deque의 끝에 있는 경우
+            if (cursor.x == current_line->left_deque->size) {
+                push_back(current_line->left_deque, ch);
+            }
+            else if (cursor.x < current_line->left_deque->size) {
+                // 커서가 left_deque 중간에 있을 경우
+                while (cursor.x < current_line->left_deque->size) {
+                    char temp = pop_back(current_line->left_deque);
+                    push_front(current_line->right_deque, temp);
+                }
+                push_back(current_line->left_deque, ch); // 문자 삽입
+            }
+            else {
+                // 커서가 right_deque에 영향을 줄 때
+                int right_offset = cursor.x - current_line->left_deque->size;
+                while (right_offset-- > 0) {
+                    char temp = pop_front(current_line->right_deque);
+                    push_back(current_line->left_deque, temp);
+                }
+                push_back(current_line->left_deque, ch);
+            }
+
+            cursor.x++; // 커서를 오른쪽으로 이동
+            unsaved_changes = 1; // 변경 사항 플래그 설정
             break;
         }
 
