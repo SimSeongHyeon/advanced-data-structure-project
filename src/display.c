@@ -1,8 +1,10 @@
 #include "display.h"
 #include "line_node.h"
 #include "os_terminal.h"
+#include "search.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 void display_text(LineList* line_list, Cursor* cursor) {
     LineNode* current = line_list->head;
@@ -85,8 +87,6 @@ void update_message_bar(const char* message) {
     // 메시지 유지: 삭제는 명시적인 호출로만 수행
 }
 
-
-
 void display_help_bar() {
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
@@ -99,5 +99,50 @@ void display_help_bar() {
     snprintf(help_message, sizeof(help_message), "HELP: Ctrl-S = save | Ctrl-Q = quit | Ctrl-F = find");
     mvprintw(max_y - 1, 0, "%-*s", max_x, help_message);
 
+    refresh();
+}
+
+void highlight_search_result(LineList* line_list, Cursor* cursor, const char* search_term) {
+    LineNode* current = line_list->head;
+    int y = 0;
+
+    while (current && y < LINES - 2) { // 상태 바와 메시지 바를 제외한 영역
+        char* line_text = dequeToString(current->left_deque);
+        if (!line_text) {
+            current = current->next;
+            y++;
+            continue;
+        }
+
+        const char* match = strstr(line_text, search_term); // 검색어 찾기
+        int x = 0;
+
+        // 라인의 모든 매칭 위치를 하이라이트
+        while (match) {
+            x = match - line_text;
+
+            // 매칭된 텍스트 하이라이트
+            for (int i = 0; i < strlen(search_term); i++) {
+                if (y == cursor->y && (x + i) == cursor->x) {
+                    // 커서와 겹치면 커서의 반전 우선
+                    attron(A_REVERSE);
+                    mvprintw(y, x + i, "%c", line_text[x + i]);
+                    attroff(A_REVERSE);
+                }
+                else {
+                    // 일반 하이라이트
+                    attron(A_STANDOUT);
+                    mvprintw(y, x + i, "%c", line_text[x + i]);
+                    attroff(A_STANDOUT);
+                }
+            }
+
+            match = strstr(match + 1, search_term); // 다음 매칭 검색
+        }
+
+        free(line_text);
+        current = current->next;
+        y++;
+    }
     refresh();
 }

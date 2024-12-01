@@ -14,7 +14,6 @@ typedef struct {
 } Deque;
 
 Deque* init_deque();
-void append_node(Deque* deque, const char* line);
 void free_deque(Deque* deque);
 
 // 추가된 함수 선언
