@@ -9,17 +9,29 @@
 #include <string.h>
 #include <stdlib.h>
 
-int confirm_exit(int* unsaved_changes) {
-    if (*unsaved_changes) { // 저장되지 않은 변경 사항이 있을 경우
-        update_message_bar("Unsaved changes! Press Ctrl+Q again to quit without saving.");
+int confirm_exit(int* unsaved_changes, LineList* line_list) {
+    // 경고 메시지 출력
+    update_message_bar("Changes have not been saved. To exit without saving, press Ctrl-Q again.");
+
+    while (1) {
         int ch = getch(); // 사용자 입력 대기
-        if (ch == 17) {   // Ctrl+Q가 다시 눌리면
-            return 1;     // 종료 신호 반환
+
+        switch (ch) {
+        case 17: // Ctrl-Q (종료)
+            return 1; // 종료 신호 반환
+
+        case 19: // Ctrl-S (저장)
+            save_file_with_prompt(line_list); // 파일 저장 로직 실행
+            update_message_bar("File saved successfully!"); // 저장 성공 메시지 출력
+            napms(2000); // 2초 동안 유지
+            update_message_bar(""); // 메시지바 초기화
+            return 0; // 저장 후 경고 상태 해제
+
+        default: // 다른 입력
+            update_message_bar(""); // 메시지바 초기화
+            return 0; // 경고 상태 해제
         }
-        update_message_bar("Exit cancelled."); // 다른 키가 눌리면 취소
-        return 0;         // 종료 취소
     }
-    return 1; // 저장된 상태면 바로 종료
 }
 
 void save_file_with_prompt(LineList* line_list) {
@@ -63,18 +75,28 @@ void handle_input(LineList* line_list, LineNode* current_line, int* cursor_x, in
 
         switch (ch) {
         case 19: // Ctrl+S (Save)
-            save_file_with_prompt(line_list); // 파일 저장
+            save_file_with_prompt(line_list); // 파일 저장 로직 실행
             unsaved_changes = 0; // 저장 후 변경 상태 초기화
+            update_message_bar("File saved successfully!"); // 저장 성공 메시지 출력
+            napms(2000); // 2초 동안 유지
+            update_message_bar(""); // 메시지바 초기화
             break;
+
 
         case 17: // Ctrl+Q (Quit)
             if (unsaved_changes) {
-                if (confirm_exit(&unsaved_changes)) {
-                    return; // 프로그램 종료
+                int exit_result = confirm_exit(&unsaved_changes, line_list);
+                if (exit_result == 1) {
+                    return; // 종료
                 }
+                else if (exit_result == 2) {
+                    save_file_with_prompt(line_list); // 저장 로직 실행
+                    unsaved_changes = 0; // 저장 후 변경 상태 초기화
+                }
+                // exit_result == 0: 경고 상태 해제 후 메시지바 초기화
             }
             else {
-                return; // 프로그램 종료
+                return; // 변경 사항이 없으면 바로 종료
             }
             break;
 

@@ -62,7 +62,7 @@ void update_status_bar(const char* filename, LineList* line_list, int cursor_x, 
     if (max_y < 2) return; // 터미널 높이가 충분하지 않으면 상태 바 표시 생략
 
     char status[256];
-    const char* display_filename = (filename && strlen(filename) > 0) ? filename : "No Name";
+    const char* display_filename = (filename && strlen(filename) > 0) ? filename : "Untitled";
 
     snprintf(status, sizeof(status), "[%s] - %d lines | Cursor: %d,%d",
         display_filename, line_list->total_lines, cursor_y + 1, cursor_x + 1);
@@ -82,13 +82,9 @@ void update_message_bar(const char* message) {
     mvprintw(max_y - 1, 0, "%-*s", max_x, message); // 메시지를 화면에 맞게 출력
     refresh();
 
-    napms(2000);  // 2초 동안 메시지 유지
-
-    // 메시지 삭제
-    move(max_y - 1, 0);
-    clrtoeol();  // 메시지 삭제
-    refresh();
+    // 메시지 유지: 삭제는 명시적인 호출로만 수행
 }
+
 
 
 void display_help_bar() {
