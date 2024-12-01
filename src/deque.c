@@ -14,12 +14,17 @@ void push_back(Deque* deque, char data) {
     new_node->prev = deque->tail;
     new_node->next = NULL;
 
-    if (deque->tail) deque->tail->next = new_node;
-    deque->tail = new_node;
-    if (!deque->head) deque->head = new_node;
+    if (deque->tail) {
+        deque->tail->next = new_node;
+    }
+    else {
+        deque->head = new_node; // deque가 비었을 경우 head 설정
+    }
 
+    deque->tail = new_node;
     deque->size++;
 }
+
 
 char pop_back(Deque* deque) {
     if (!deque || !deque->tail) return '\0'; // 빈 덱 처리
@@ -54,7 +59,7 @@ void push_front(Deque* deque, char data) {
 }
 
 char pop_front(Deque* deque) {
-    if (!deque->head) return '\0'; // 빈 덱 처리
+    if (!deque->head) return '\0'; // 빈 deque 처리
 
     Node* head = deque->head;
     char data = head->data;
@@ -64,7 +69,7 @@ char pop_front(Deque* deque) {
         deque->head->prev = NULL;
     }
     else {
-        deque->tail = NULL;
+        deque->tail = NULL; // deque가 비었을 경우 tail도 NULL로 설정
     }
 
     free(head);

@@ -95,14 +95,14 @@ void handle_input(LineList* line_list, LineNode* current_line, int* cursor_x, in
             break;
 
         case KEY_PPAGE:
-        case 451: // Page Up 처리
+        case 451: // 노트북 Page Up
             current_line = line_list->head;
             cursor.x = 0; // 첫 번째 텍스트의 시작
             cursor.y = 0; // 첫 번째 라인의 y 위치
             break;
 
         case KEY_NPAGE: // Page Down 처리
-        case 457:
+        case 457: // 노트북 Page Down
             current_line = line_list->tail;
             cursor.x = current_line->left_deque->size + current_line->right_deque->size; // 마지막 텍스트 끝
             cursor.y = line_list->total_lines - 1; // 마지막 라인의 y 위치
@@ -141,21 +141,47 @@ void handle_input(LineList* line_list, LineNode* current_line, int* cursor_x, in
         }
               break;
 
-        case '\n': { // 새 줄 생성
+        case '\n': { // 줄 바꿈 처리
             LineNode* new_line = create_line_node();
             if (!new_line) {
                 update_message_bar("Error: Unable to create new line.");
                 continue;
             }
+
+            // 현재 커서 위치를 기준으로 right_deque를 분리
+            while (cursor.x < current_line->left_deque->size) {
+                char c = pop_back(current_line->left_deque);
+                push_front(current_line->right_deque, c);
+            }
+
+            // 현재 라인의 right_deque 내용을 새 노드의 left_deque로 이동
             while (current_line->right_deque->size > 0) {
                 char c = pop_front(current_line->right_deque);
                 push_back(new_line->left_deque, c);
             }
-            current_line->next = new_line;
+
+            // 현재 라인의 연결 관계 업데이트
+            new_line->next = current_line->next;
             new_line->prev = current_line;
+            if (current_line->next) {
+                current_line->next->prev = new_line;
+            }
+            current_line->next = new_line;
+
+            // LineList의 tail 업데이트 (새 라인이 마지막 라인이면)
+            if (line_list->tail == current_line) {
+                line_list->tail = new_line;
+            }
+
+            // 커서 위치 갱신
             current_line = new_line;
-            cursor.x = 0;
-            cursor.y += 1;
+            cursor.x = 0; // 새 줄의 가장 왼쪽으로 이동
+            cursor.y++;
+
+            // LineList의 총 라인 수 업데이트
+            line_list->total_lines++;
+
+            // 변경 사항 플래그 설정
             unsaved_changes = 1;
         }
                  break;

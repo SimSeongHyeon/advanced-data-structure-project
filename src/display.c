@@ -12,10 +12,9 @@ void display_text(LineList* line_list, Cursor* cursor) {
         Node* left_current = current->left_deque->head;
         int x = 0;
 
-        // left_deque에서 출력
+        // left_deque 출력
         while (left_current) {
             if (y == cursor->y && x == cursor->x) {
-                // 커서 위치의 문자는 색 반전으로 표시
                 attron(A_REVERSE);
                 mvprintw(y, x, "%c", left_current->data);
                 attroff(A_REVERSE);
@@ -27,11 +26,10 @@ void display_text(LineList* line_list, Cursor* cursor) {
             x++;
         }
 
-        // right_deque에서 출력
+        // right_deque 출력
         Node* right_current = current->right_deque->head;
         while (right_current) {
             if (y == cursor->y && x == cursor->x) {
-                // 커서 위치의 문자는 색 반전으로 표시
                 attron(A_REVERSE);
                 mvprintw(y, x, "%c", right_current->data);
                 attroff(A_REVERSE);
@@ -43,10 +41,10 @@ void display_text(LineList* line_list, Cursor* cursor) {
             x++;
         }
 
-        // 커서가 줄의 끝에 위치한 경우 빈 공간에 색 반전 처리
+        // 빈 공간에 커서 출력
         if (y == cursor->y && x == cursor->x) {
             attron(A_REVERSE);
-            mvprintw(y, x, " "); // 공백 출력
+            mvprintw(y, x, " ");
             attroff(A_REVERSE);
         }
 
@@ -56,7 +54,6 @@ void display_text(LineList* line_list, Cursor* cursor) {
 
     refresh();
 }
-
 
 void update_status_bar(const char* filename, LineList* line_list, int cursor_x, int cursor_y) {
     int max_y, max_x;
